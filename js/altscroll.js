@@ -239,7 +239,7 @@ AltScroll.prototype.scroll = function(e)
             this.container.removeEventListener('scroll', this.scrollEvent);
             this.scrollEvent = null;
             this.snapToNearest();
-        }.bind(this), 1000); 
+        }.bind(this), 500); 
     }
 } 
 
