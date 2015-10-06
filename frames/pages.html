@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body, html { width: 100%; height: 100%; }
+		body { margin: 0; padding: 0; font-family: serif; color: #333333; font-size: 17px; }
+		body * { box-sizing: border-box; }
+
+		#scroll-container { width: 100%; height: 100%; overflow: hidden; }
+		#scroll { width: 100%; height: 100%; overflow: scroll; }
+		#scroll .content { width: 300%; height: 200%; }
+		#scroll .content .page { 
+			width: 33.3333333%; 
+			height: 50%;
+			float: left;
+			padding: 15px;
+			position: relative;
+			z-index: 10;
+		}
+		#scroll .content .page:nth-child(odd) { background-color: #f9f9f9; }
+		#scroll .content .page:nth-child(even) { background-color: #eeeeee; }
+		#scroll .content .page:nth-child(2) { background: url(../img/1.jpg) center center no-repeat; } 
+		#scroll .content .page:nth-child(4) { background: url(../img/2.jpg) center center no-repeat; } 
+		#scroll .content .page:nth-child(6) { background: url(../img/3.jpg) center center no-repeat; } 
+	</style>
+	<script src="../js/easing.js"></script>
+	<script src="../js/altscroll.js"></script>
+	<script>
+		function load()
+		{
+			var scroll = new AltScroll(document.getElementById('scroll'), { snap: true });
+		}
+	</script>
+</head>
+<body onload="load()">
+	<div id="scroll-container" class="hide-scroll">
+		<div id="scroll">
+			<div class="content">
+				<div class="page">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque eget mattis dui. Fusce congue sed diam id tempor. Vivamus ac pellentesque purus. Fusce pulvinar, augue non iaculis ultricies, dolor tortor congue risus, eu congue diam erat eu justo. Fusce dignissim nunc imperdiet lectus bibendum suscipit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Mauris vel elementum ex, eget vehicula est. Phasellus ac luctus odio. Pellentesque non risus a velit ultricies viverra. Suspendisse ligula ex, dignissim ac turpis vitae, imperdiet faucibus massa. Nullam id tempus lacus.</div>
+				<div class="page"></div>
+				<div class="page">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque eget mattis dui. Fusce congue sed diam id tempor. Vivamus ac pellentesque purus. Fusce pulvinar, augue non iaculis ultricies, dolor tortor congue risus, eu congue diam erat eu justo. Fusce dignissim nunc imperdiet lectus bibendum suscipit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Mauris vel elementum ex, eget vehicula est. Phasellus ac luctus odio. Pellentesque non risus a velit ultricies viverra. Suspendisse ligula ex, dignissim ac turpis vitae, imperdiet faucibus massa. Nullam id tempus lacus.</div>
+				<div class="page"></div>
+				<div class="page">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque eget mattis dui. Fusce congue sed diam id tempor. Vivamus ac pellentesque purus. Fusce pulvinar, augue non iaculis ultricies, dolor tortor congue risus, eu congue diam erat eu justo. Fusce dignissim nunc imperdiet lectus bibendum suscipit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Mauris vel elementum ex, eget vehicula est. Phasellus ac luctus odio. Pellentesque non risus a velit ultricies viverra. Suspendisse ligula ex, dignissim ac turpis vitae, imperdiet faucibus massa. Nullam id tempus lacus.</div>
+				<div class="page"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

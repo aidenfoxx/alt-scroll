@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Alternate Scroll</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		body { margin: 0; padding: 0; background-color: #333333; }
+		body * { box-sizing: border-box; }
+
+		.clearfix:before, .clearfix:after { content: " "; display: table; }
+		.clearfix:after { clear: both; }
+
+		#mobile {
+			margin: 50px auto 0;
+			height: 600px;
+			width: 320px;
+			border: 3px solid #333333;
+			border-radius: 30px;
+			padding: 10px;
+			background-color: #111111;
+			box-shadow: 0 0 50px #222222;
+		}
+		#mobile .speaker {
+			width: 60px;
+			margin: 20px auto 25px;
+			border: 3px solid #333333;
+			padding: 2px;
+			border-radius: 10px;
+		}
+		#mobile .screen {
+			width: 100%;
+			height: 450px;
+			border: 3px solid #333333;
+			border-radius: 5px;
+			overflow: hidden;
+		}
+		#mobile .home {
+			width: 50px;
+			height: 50px;
+			margin: 15px auto;
+			border: 3px solid #333333;
+			border-radius: 30px;
+		}
+		#mobile .screen iframe { width: 100%; height: 100%; border: none; }
+
+		#links {
+			margin: 20px auto 50px;
+			width: 320px;
+			border: 3px solid #333333;
+			box-shadow: 0 0 30px #222222;
+			overflow: hidden;
+			border-radius: 10px;
+		}
+		#links a {
+			display: block;
+			float: left;
+			width: 33.33333%;
+			text-align: center;
+			padding: 15px 0;
+			font-family: sans-serif;
+			color: #cccccc;
+			text-decoration: none;
+			text-transform: uppercase;
+			font-weight: bold;
+			font-size: 11px;
+			border-left: 3px solid #333333;
+			box-shadow: inset 0 0 20px #222222;
+		}
+		#links a:first-child { border: none; }
+		#links a:hover { box-shadow: none; background-color: #00A8E8; }
+	</style>
+	<script>
+		function load()
+		{
+			var content = document.getElementById('content');
+			var links = document.getElementById('links').children;
+
+			var handleClick = function(e)
+			{
+				e.preventDefault();
+				content.src = this.href;
+			}
+
+			for (var i = 0, len = links.length; i < len; i++)
+				links[i].addEventListener('click', handleClick);
+		}
+	</script>
+</head>
+<body onload="load()">
+	<div id="mobile">
+		<div class="speaker"></div>
+		<div class="screen">
+			<iframe id="content" src="./frames/list.html"></iframe>
+		</div>
+		<div class="home"></div>
+	</div>
+	<div id="links">
+		<a href="./frames/list.html">List</a>
+		<a href="./frames/snap.html">+ Snap</a>
+		<a href="./frames/pages.html">Pages</a>
+		<div class="clearfix"></div>
+	</div>
+</body>
+</html>
