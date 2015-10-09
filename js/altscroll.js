@@ -149,28 +149,31 @@ AltScroll.prototype.bindEvents = function()
 AltScroll.prototype.resize = function()
 {
     clearTimeout(this.resizeTimeout);
-    this.resizeTimeout = setTimeout(function() {
-        this.hideScrollbars();
-        this.containerRect = this.container.getBoundingClientRect();
-        this.contentRect = this.content.getBoundingClientRect();
-        this.childRect = this.getChildRect();
-    }.bind(this), 500);
+    this.resizeTimeout = setTimeout(function() { this.resizeCallback(); }.bind(this), 500);
+}
+
+AltScroll.prototype.resizeCallback = function()
+{
+    this.hideScrollbars();
+    this.containerRect = this.container.getBoundingClientRect();
+    this.contentRect = this.content.getBoundingClientRect();
+    this.childRect = this.getChildRect();
 }
 
 AltScroll.prototype.scrollTo = function(x, y, speed, easing)
 {
     var contentWidth = this.contentRect.width - this.containerRect.width + this.scrollbarSize;
-    var contentHeight = this.contentRect.height - this.containerRect.height + this.scrollbarSize;;
+    var contentHeight = this.contentRect.height - this.containerRect.height + this.scrollbarSize;
 
     // Collision detection
-    if (contentWidth > 0 && (x < 0 || x > contentWidth))
+    if (x < 0 || x > contentWidth)
     {
         var moveX = x - this.container.scrollLeft;
         x = x < 0 ? 0 : contentWidth;
         var clampX = Math.abs(x - this.container.scrollLeft) / Math.abs(moveX);
     }
 
-    if (contentHeight > 0 && (y < 0 || y > contentHeight))
+    if (y < 0 || y > contentHeight)
     {
         var moveY = y - this.container.scrollTop;
         y = y < 0 ? 0 : contentHeight;
@@ -188,18 +191,18 @@ AltScroll.prototype.scrollTo = function(x, y, speed, easing)
     this.scrollFrame = window.requestAnimationFrame(function() { this.scrollToFrame(Date.now(), this.container.scrollLeft, x, this.container.scrollTop, y, speed, easing); }.bind(this))
 }
 
-AltScroll.prototype.scrollToFrame = function(start, fromX, toX, fromY, toY, speed, easing)
+AltScroll.prototype.scrollToFrame = function(startTime, fromX, toX, fromY, toY, speed, easing)
 {
     if (speed > 0)
     {
-        var delta = Date.now() - start;
+        var delta = Date.now() - startTime;
         var animPercent = delta / speed;
 
         if (animPercent < 1)
         {
             this.container.scrollLeft = Math.round(fromX + ((toX - fromX) * (!easing ? animPercent : easing(animPercent))));
             this.container.scrollTop = Math.round(fromY + ((toY - fromY) * (!easing ? animPercent : easing(animPercent))));
-            this.scrollFrame = window.requestAnimationFrame(function() { this.scrollToFrame(start, fromX, toX, fromY, toY, speed, easing); }.bind(this));
+            this.scrollFrame = window.requestAnimationFrame(function() { this.scrollToFrame(startTime, fromX, toX, fromY, toY, speed, easing); }.bind(this));
             return;
         }
     }

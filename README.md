@@ -5,7 +5,7 @@ I only reccomend using this plugin over Lite Scroll if you need navive scroll ev
 
 Script example (http://foxx.io/altscroll/).
 
-## Easing
+## Requirements
 To enable easing you must first have the following easing plugin by gre enabled (https://gist.github.com/gre/1650294).
 
 ## Usage
