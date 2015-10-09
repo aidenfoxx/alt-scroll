@@ -72,7 +72,7 @@ scroll.snapToNearest(speed, easing)
 ````
 
 ## Browser Compatibility
-The plugin has been tested and is working in all major web browsers, and supports IE8 and above.
+The plugin has been tested and is working in all major web browsers, and supports IE9 and above.
 
 ## Future Development
 - All done for now. I'm open to suggestions.
