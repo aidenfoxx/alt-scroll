@@ -22,19 +22,20 @@ function AltScroll(container, options)
     this.scrollbarSize = this.calcScrollbarSize();
     this.scrollEvent = null;
     this.scrollFrame = null;
+    this.scrollTimeout = null;
 
     this.dragEvent = null;
     this.dragBegin = null;
-
-    this.scrollInitVec = { x: 0, y: 0 };
-    this.scrollInitMouseVec = { x: 0, y: 0 };
+    this.dragInitVec = { x: 0, y: 0 };
+    this.dragInitMouseVec = { x: 0, y: 0 };
 
     this.resizeTimeout = null;
-    this.snapTimeout = null;
 
     this.options = {
         snap: false,
         snapSpeed: 300,
+        scrollLock: false,
+        scrollLockThreshold: 20,
         momentum: true,
         momentumFalloff: .006
     };
@@ -43,12 +44,7 @@ function AltScroll(container, options)
         this.options[key] = options[key];
 
     this.hideScrollbars();
-
-    // Everything gets cached
-    this.containerRect = this.container.getBoundingClientRect();
-    this.contentRect = this.content.getBoundingClientRect();
-    this.childRect = this.getChildRect();
-
+    this.resizeCallback();
     this.bindEvents();
 }
 
@@ -130,7 +126,7 @@ AltScroll.prototype.hideScrollbars = function()
 {
     var parent = this.container.parentElement;
 
-    if (parent.className === 'hide-scroll')
+    if (parent.className.indexOf('hide-scroll') > -1)
     {
         this.container.style.width = (parent.offsetWidth + this.scrollbarSize) + 'px';
         this.container.style.height = (parent.offsetHeight + this.scrollbarSize) + 'px';
@@ -237,8 +233,8 @@ AltScroll.prototype.scroll = function(e)
 {
     if (this.options.snap)
     {
-        clearTimeout(this.snapTimeout);
-        this.snapTimeout = setTimeout(function() {
+        clearTimeout(this.scrollTimeout);
+        this.scrollTimeout = setTimeout(function() {
             this.container.removeEventListener('scroll', this.scrollEvent);
             this.scrollEvent = null;
             this.snapToNearest();
@@ -252,9 +248,9 @@ AltScroll.prototype.dragStart = function(e)
 
     if (!this.dragEvent)
     {
-        this.scrollBegin = Date.now();
-        this.scrollInitMouseVec = this.calcTouchCoords(e);
-        this.scrollInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
+        this.dragBegin = Date.now();
+        this.dragInitMouseVec = this.calcTouchCoords(e);
+        this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
         this.dragEvent = this.drag.bind(this);
         this.container.addEventListener('mousemove', this.dragEvent);
     }
@@ -265,10 +261,10 @@ AltScroll.prototype.drag = function(e)
     e.preventDefault();
 
     var mousePos = this.calcTouchCoords(e);
-    var moveX = this.scrollInitMouseVec.x - mousePos.x;
-    var moveY = this.scrollInitMouseVec.y - mousePos.y;
+    var moveX = this.dragInitMouseVec.x - mousePos.x;
+    var moveY = this.dragInitMouseVec.y - mousePos.y;
 
-    this.scrollTo(this.scrollInitVec.x + moveX, this.scrollInitVec.y + moveY, 0);
+    this.scrollTo(this.dragInitVec.x + moveX, this.dragInitVec.y + moveY, 0);
 }
 
 AltScroll.prototype.dragEnd = function(e)
@@ -280,11 +276,11 @@ AltScroll.prototype.dragEnd = function(e)
         if (this.options.momentum)
         {
             var mousePos = this.calcTouchCoords(e);
-            var dragTime = Date.now() - this.scrollBegin;
+            var dragTime = Date.now() - this.dragBegin;
 
             // Based on movement since we started dragging
-            var velX = (this.scrollInitMouseVec.x - mousePos.x) / dragTime;
-            var velY = (this.scrollInitMouseVec.y - mousePos.y) / dragTime;
+            var velX = (this.dragInitMouseVec.x - mousePos.x) / dragTime;
+            var velY = (this.dragInitMouseVec.y - mousePos.y) / dragTime;
 
             // Use the highest velocity
             var animationLength = Math.abs(Math.abs(velX) > Math.abs(velY) ? velX : velY) / this.options.momentumFalloff;
