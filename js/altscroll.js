@@ -31,6 +31,10 @@ function AltScroll(container, options)
 
     this.resizeTimeout = null;
 
+    this.containerRect = null;
+    this.contentRect = null;
+    this.childRect = null;
+
     this.options = {
         snap: false,
         snapSpeed: 300,
