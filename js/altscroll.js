@@ -250,7 +250,7 @@ AltScroll.prototype.dragStart = function(e)
 {
     e.preventDefault();
 
-    if (!this.dragEvent)
+    if (!this.dragEvent && !e.sourceCapabilities.firesTouchEvents)
     {
         this.dragBegin = Date.now();
         this.dragInitMouseVec = this.calcTouchCoords(e);
