@@ -250,7 +250,8 @@ AltScroll.prototype.dragStart = function(e)
 {
     e.preventDefault();
 
-    if (!this.dragEvent && !e.sourceCapabilities.firesTouchEvents)
+    // sourceCapabilities fixes webkit bug with random mouse triggers on touch events
+    if (!this.dragEvent && (!e.sourceCapabilities || !e.sourceCapabilities.firesTouchEvents))
     {
         this.dragBegin = Date.now();
         this.dragInitMouseVec = this.calcTouchCoords(e);
