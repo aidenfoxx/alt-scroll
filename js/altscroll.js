@@ -1,7 +1,7 @@
 /** 
  * Alternate Scroll
  * 
- * @version    0.2.0
+ * @version    0.2.1
  * @author     Aiden Foxx
  * @license    MIT License 
  * @copyright  2015 Aiden Foxx
@@ -24,6 +24,7 @@ function AltScroll(container, options)
     this.scrollTimeout = null;
     this.scrollEvent = null;
 
+    this.dragStartEvent = null;
     this.dragEvent = null;
     this.dragBegin = null;
     this.dragInitVec = { x: 0, y: 0 };
@@ -140,17 +141,21 @@ AltScroll.prototype.hideScrollbars = function()
 
 AltScroll.prototype.bindEvents = function()
 {
-    this.container.addEventListener('touchstart', this.scrollStop.bind(this));
-    this.container.addEventListener('mousedown', this.dragStart.bind(this));
+    this.dragStartEvent = this.dragStart.bind(this);
+    
+    // Mouse event unbinding and rebinding on touch
+    this.container.addEventListener('touchstart', this.touchStart.bind(this));
+    window.addEventListener('touchend', this.touchEnd.bind(this));
+    window.addEventListener('touchcancel', this.touchEnd.bind(this));
+
+    this.container.addEventListener('mousedown', this.dragStartEvent);
+    window.addEventListener('mouseup', this.dragEnd.bind(this));
     window.addEventListener('resize', this.resize.bind(this));
-    window.addEventListener('mouseup', this.dragEnd.bind(this)); 
 
     if (this.options.snap)
     {
         this.container.addEventListener('mousewheel', this.snapDelay.bind(this));
         this.container.addEventListener('DOMMouseScroll', this.snapDelay.bind(this));
-        this.container.addEventListener('touchend', this.snapDelay.bind(this));
-        this.container.addEventListener('touchcancel', this.snapDelay.bind(this));
     }
 }
 
@@ -257,20 +262,40 @@ AltScroll.prototype.snapDelay = function()
     }
 }
 
+AltScroll.prototype.touchStart = function()
+{
+    // Unbind mouse events on touch
+    this.container.removeEventListener('mousedown', this.dragStartEvent);
+    this.dragStartEvent = null;
+    this.scrollStop();
+}
+
+AltScroll.prototype.touchEnd = function()
+{
+    // Rebind once touch has stopped
+    if (!this.dragStartEvent)
+    {
+        // Not ideal fix to the mouse event being triggered after touchend
+        setTimeout(function() {
+            this.dragStartEvent = this.dragStart.bind(this);
+            this.container.addEventListener('mousedown', this.dragStartEvent);
+        }.bind(this), 50);
+
+        if (this.options.snap)
+            this.snapDelay();
+    }
+}
+
 AltScroll.prototype.dragStart = function(e)
 {
     e.preventDefault();
+
     this.scrollStop();
-    
-    // sourceCapabilities fixes webkit bug with random mouse triggers on touch events
-    if (!this.dragEvent && (!e.sourceCapabilities || !e.sourceCapabilities.firesTouchEvents))
-    {
-        this.dragBegin = Date.now();
-        this.dragInitMouseVec = this.calcTouchCoords(e);
-        this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
-        this.dragEvent = this.drag.bind(this);
-        this.container.addEventListener('mousemove', this.dragEvent);
-    }
+    this.dragBegin = Date.now();
+    this.dragInitMouseVec = this.calcTouchCoords(e);
+    this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
+    this.dragEvent = this.drag.bind(this);
+    this.container.addEventListener('mousemove', this.dragEvent);
 }
 
 AltScroll.prototype.drag = function(e)
