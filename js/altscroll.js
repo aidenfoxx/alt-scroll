@@ -1,7 +1,7 @@
 /** 
  * Alternate Scroll
  * 
- * @version    0.1.0
+ * @version    0.2.0
  * @author     Aiden Foxx
  * @license    MIT License 
  * @copyright  2015 Aiden Foxx
@@ -20,9 +20,9 @@ function AltScroll(container, options)
     this.content = container.children[0];
 
     this.scrollbarSize = this.calcScrollbarSize();
-    this.scrollEvent = null;
     this.scrollFrame = null;
     this.scrollTimeout = null;
+    this.scrollEvent = null;
 
     this.dragEvent = null;
     this.dragBegin = null;
@@ -30,6 +30,7 @@ function AltScroll(container, options)
     this.dragInitMouseVec = { x: 0, y: 0 };
 
     this.resizeTimeout = null;
+    this.snapTimeout = null;
 
     this.containerRect = null;
     this.contentRect = null;
@@ -139,11 +140,18 @@ AltScroll.prototype.hideScrollbars = function()
 
 AltScroll.prototype.bindEvents = function()
 {
-    this.scrollEvent = this.scroll.bind(this);
-    this.container.addEventListener('scroll', this.scrollEvent);
+    this.container.addEventListener('touchstart', this.scrollStop.bind(this));
     this.container.addEventListener('mousedown', this.dragStart.bind(this));
-    window.addEventListener('mouseup', this.dragEnd.bind(this));
     window.addEventListener('resize', this.resize.bind(this));
+    window.addEventListener('mouseup', this.dragEnd.bind(this)); 
+
+    if (this.options.snap)
+    {
+        this.container.addEventListener('mousewheel', this.snapDelay.bind(this));
+        this.container.addEventListener('DOMMouseScroll', this.snapDelay.bind(this));
+        this.container.addEventListener('touchend', this.snapDelay.bind(this));
+        this.container.addEventListener('touchcancel', this.snapDelay.bind(this));
+    }
 }
 
 AltScroll.prototype.resize = function()
@@ -160,7 +168,7 @@ AltScroll.prototype.resizeCallback = function()
     this.childRect = this.getChildRect();
 }
 
-AltScroll.prototype.scrollTo = function(x, y, speed, easing)
+AltScroll.prototype.scrollTo = function(x, y, speed, easing, callback)
 {
     var contentWidth = this.contentRect.width - this.containerRect.width + this.scrollbarSize;
     var contentHeight = this.contentRect.height - this.containerRect.height + this.scrollbarSize;
@@ -187,11 +195,11 @@ AltScroll.prototype.scrollTo = function(x, y, speed, easing)
     else if (clampX && clampY)
         speed *= clampX < clampY ? clampX : clampY;
 
-    window.cancelAnimationFrame(this.scrollFrame);
-    this.scrollFrame = window.requestAnimationFrame(function() { this.scrollToFrame(Date.now(), this.container.scrollLeft, x, this.container.scrollTop, y, speed, easing); }.bind(this))
+    this.scrollStop();
+    this.scrollFrame = window.requestAnimationFrame(function() { this.scrollToFrame(Date.now(), this.container.scrollLeft, x, this.container.scrollTop, y, speed, easing, callback); }.bind(this))
 }
 
-AltScroll.prototype.scrollToFrame = function(startTime, fromX, toX, fromY, toY, speed, easing)
+AltScroll.prototype.scrollToFrame = function(startTime, fromX, toX, fromY, toY, speed, easing, callback)
 {
     if (speed > 0)
     {
@@ -202,54 +210,58 @@ AltScroll.prototype.scrollToFrame = function(startTime, fromX, toX, fromY, toY, 
         {
             this.container.scrollLeft = Math.round(fromX + ((toX - fromX) * (!easing ? animPercent : easing(animPercent))));
             this.container.scrollTop = Math.round(fromY + ((toY - fromY) * (!easing ? animPercent : easing(animPercent))));
-            this.scrollFrame = window.requestAnimationFrame(function() { this.scrollToFrame(startTime, fromX, toX, fromY, toY, speed, easing); }.bind(this));
+            this.scrollFrame = window.requestAnimationFrame(function() { this.scrollToFrame(startTime, fromX, toX, fromY, toY, speed, easing, callback); }.bind(this));
             return;
         }
     }
     this.container.scrollLeft = Math.round(toX);
     this.container.scrollTop = Math.round(toY);
-    this.scrollEnd();
+
+    if (callback) 
+        callback.bind(this)();
 }
 
-AltScroll.prototype.scrollEnd = function()
+AltScroll.prototype.scrollStop = function()
 {
-    if (!this.scrollEvent)
-    {
-        this.scrollEvent = this.scroll.bind(this);
-        this.container.addEventListener('scroll', this.scrollEvent);
-    }   
+    window.cancelAnimationFrame(this.scrollFrame);
 }
 
-AltScroll.prototype.snapTo = function(i, speed, easing)
+AltScroll.prototype.snapTo = function(i, speed, easing, callback)
 {
     if (!this.childRect[i])
         return false;
     var snapPos = this.calcRelativePos(this.childRect[i].left, this.childRect[i].top);
-    this.scrollTo(snapPos.x, snapPos.y, speed >= 0 ? speed : this.options.snapSpeed, typeof EasingFunctions === 'object' ? EasingFunctions.easeOutCubic : easing);
+    this.scrollTo(snapPos.x, snapPos.y, speed >= 0 ? speed : this.options.snapSpeed, typeof EasingFunctions === 'object' ? EasingFunctions.easeOutCubic : easing, callback);
 }
 
-AltScroll.prototype.snapToNearest = function(speed, easing)
+AltScroll.prototype.snapToNearest = function(speed, easing, callback)
 {
-    return this.snapTo(this.calcNearestChild(), speed, easing);   
+    return this.snapTo(this.calcNearestChild(), speed, easing, callback);   
 }
 
-AltScroll.prototype.scroll = function(e)
+AltScroll.prototype.snapDelay = function()
 {
-    if (this.options.snap)
+    this.scrollStop();
+
+    clearTimeout(this.snapTimeout);
+    this.snapTimeout = setTimeout(function() { 
+        this.container.removeEventListener('scroll', this.scrollEvent); 
+        this.scrollEvent = null; 
+        this.snapToNearest();
+    }.bind(this), 500);
+    
+    if (!this.scrollEvent)
     {
-        clearTimeout(this.scrollTimeout);
-        this.scrollTimeout = setTimeout(function() {
-            this.container.removeEventListener('scroll', this.scrollEvent);
-            this.scrollEvent = null;
-            this.snapToNearest();
-        }.bind(this), 500); 
+        this.scrollEvent = function() { this.snapDelay(); }.bind(this);
+        this.container.addEventListener('scroll', this.scrollEvent)
     }
-} 
+}
 
 AltScroll.prototype.dragStart = function(e)
 {
     e.preventDefault();
-
+    this.scrollStop();
+    
     // sourceCapabilities fixes webkit bug with random mouse triggers on touch events
     if (!this.dragEvent && (!e.sourceCapabilities || !e.sourceCapabilities.firesTouchEvents))
     {
@@ -263,8 +275,6 @@ AltScroll.prototype.dragStart = function(e)
 
 AltScroll.prototype.drag = function(e)
 {
-    e.preventDefault();
-
     var mousePos = this.calcTouchCoords(e);
     var moveX = this.dragInitMouseVec.x - mousePos.x;
     var moveY = this.dragInitMouseVec.y - mousePos.y;
@@ -294,7 +304,11 @@ AltScroll.prototype.dragEnd = function(e)
             var newX = this.container.scrollLeft + (Math.abs(velX) * velX) / (this.options.momentumFalloff * 2);
             var newY = this.container.scrollTop + (Math.abs(velY) * velY) / (this.options.momentumFalloff * 2);
 
-            this.scrollTo(newX, newY, animationLength, typeof EasingFunctions === 'object' ? EasingFunctions.easeOutCubic : null);
+            this.scrollTo(newX, newY, animationLength, typeof EasingFunctions === 'object' ? EasingFunctions.easeOutCubic : null, this.options.snap ? this.snapToNearest : null);
+        }
+        else if (this.options.snap)
+        {
+            this.snapToNearest();
         }
 
         this.container.removeEventListener('mousemove', this.dragEvent);

@@ -1,4 +1,4 @@
-# Alternate Scroll (Version 0.1.0)
+# Alternate Scroll (Version 0.2.0)
 Alternet Scroll is a modified version of Lite Scroll designed to act as touch shiv for the native browser scroller, which differs from Lite Scroll which acts as a complete overhaul of the touch scrolling events.
 
 I only reccomend using this plugin over Lite Scroll if you need native scroll events, better performance or older browser support. Otherwise Lite Scroll offers far more functionality and a better touch experience.
@@ -61,14 +61,14 @@ The script has multiple avalible methods.
 ```javascript
 var scroll = LiteScroll(element, options);
 
-// Will scroll the defined coordinates (px, px, ms, jsEasingObjectFunction)
-scroll.scrollTo(x, y, speed, easing)
+// Will scroll the defined coordinates (px, px, ms, jsEasingObjectFunction, function)
+scroll.scrollTo(x, y, speed, easing, callback)
 
-// Will snap to a child element of the scroller based on the dom index (int, ms, jsEasingObjectFunction)
-scroll.snapTo(domIndex, speed, easing)
+// Will snap to a child element of the scroller based on the dom index (int, ms, jsEasingObjectFunction, function)
+scroll.snapTo(domIndex, speed, easing, callback)
 
-// Will snap to the nearest child element of the scroller (ms, jsEasingObjectFunction)
-scroll.snapToNearest(speed, easing)
+// Will snap to the nearest child element of the scroller (ms, jsEasingObjectFunction, function)
+scroll.snapToNearest(speed, easing, callback)
 ````
 
 ## Browser Compatibility
