@@ -297,13 +297,16 @@ AltScroll.prototype.touchEnd = function()
 AltScroll.prototype.dragStart = function(e)
 {
     e.preventDefault();
-
     this.scrollStop();
-    this.dragBegin = Date.now();
-    this.dragInitMouseVec = this.calcTouchCoords(e);
-    this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
-    this.dragEvent = this.drag.bind(this);
-    this.container.addEventListener('mousemove', this.dragEvent);
+
+    if (!this.dragEvent)
+    {
+        this.dragBegin = Date.now();
+        this.dragInitMouseVec = this.calcTouchCoords(e);
+        this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
+        this.dragEvent = this.drag.bind(this);
+        this.container.addEventListener('mousemove', this.dragEvent);
+    }
 }
 
 AltScroll.prototype.drag = function(e)
