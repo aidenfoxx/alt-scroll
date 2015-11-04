@@ -11,6 +11,9 @@
 
 'use strict';
 
+/**
+ * @constructor
+ */
 function AltScroll(container, options)
 {
     if (!(this instanceof AltScroll))
@@ -156,6 +159,11 @@ AltScroll.prototype.bindEvents = function()
     {
         this.container.addEventListener('mousewheel', this.snapDelay.bind(this));
         this.container.addEventListener('DOMMouseScroll', this.snapDelay.bind(this));
+    }
+    else
+    {
+        this.container.addEventListener('mousewheel', this.scrollStop.bind(this));
+        this.container.addEventListener('DOMMouseScroll', this.scrollStop.bind(this));
     }
 }
 
