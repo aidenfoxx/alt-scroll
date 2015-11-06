@@ -145,15 +145,31 @@ AltScroll.prototype.hideScrollbars = function()
 AltScroll.prototype.bindEvents = function()
 {
     this.dragStartEvent = this.dragStart.bind(this);
-    
-    // Mouse event unbinding and rebinding on touch
-    this.container.addEventListener('touchstart', this.touchStart.bind(this));
-    window.addEventListener('touchend', this.touchEnd.bind(this));
-    window.addEventListener('touchcancel', this.touchEnd.bind(this));
+
+    // Fix for IE not supporting touch events
+    if (!('ontouchstart' in window))
+    {
+        if (navigator.maxTouchPoints > 0)
+        {
+            this.container.addEventListener('pointerdown', this.touchStart.bind(this));
+            window.addEventListener('pointerout', this.touchEnd.bind(this));
+        }
+        else if (navigator.msMaxTouchPoints > 0)
+        {
+            this.container.addEventListener('MSPointerDown', this.touchStart.bind(this));
+            window.addEventListener('MSPointerOut', this.touchEnd.bind(this));
+        }
+    }
+    else
+    {
+        this.container.addEventListener('touchstart', this.touchStart.bind(this));
+        window.addEventListener('touchend', this.touchEnd.bind(this));
+        window.addEventListener('touchcancel', this.touchEnd.bind(this));  
+    }
 
     this.container.addEventListener('mousedown', this.dragStartEvent);
     window.addEventListener('mouseup', this.dragEnd.bind(this));
-    window.addEventListener('resize', this.resize.bind(this));
+    window.addEventListener('resize', this.resize.bind(this));  
 
     if (this.options.snap)
     {
@@ -270,18 +286,21 @@ AltScroll.prototype.snapDelay = function()
     }
 }
 
-AltScroll.prototype.touchStart = function()
+AltScroll.prototype.touchStart = function(e)
 {
     // Unbind mouse events on touch
-    this.container.removeEventListener('mousedown', this.dragStartEvent);
-    this.dragStartEvent = null;
-    this.scrollStop();
+    if (this.dragStartEvent && (!e.pointerType || e.pointerType === 'touch'))
+    {
+        this.container.removeEventListener('mousedown', this.dragStartEvent);
+        this.dragStartEvent = null;
+        this.scrollStop();
+    }
 }
 
-AltScroll.prototype.touchEnd = function()
+AltScroll.prototype.touchEnd = function(e)
 {
     // Rebind once touch has stopped
-    if (!this.dragStartEvent)
+    if (!this.dragStartEvent && (!e.pointerType || e.pointerType === 'touch'))
     {
         // Not ideal fix to the mouse event being triggered after touchend
         setTimeout(function() {
