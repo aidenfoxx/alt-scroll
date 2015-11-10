@@ -306,7 +306,7 @@ AltScroll.prototype.touchEnd = function(e)
         setTimeout(function() {
             this.dragStartEvent = this.dragStart.bind(this);
             this.container.addEventListener('mousedown', this.dragStartEvent);
-        }.bind(this), 50);
+        }.bind(this), 1000);
 
         if (this.options.snap)
             this.snapDelay();
