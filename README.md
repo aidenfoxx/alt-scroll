@@ -1,4 +1,4 @@
-# Alternate Scroll (Version 0.2.1)
+# Alternate Scroll (Version 0.2.2)
 Alternet Scroll is a modified version of Lite Scroll designed to act as touch shiv for the native browser scroller, which differs from Lite Scroll which acts as a complete overhaul of the touch scrolling events.
 
 I only reccomend using this plugin over Lite Scroll if you need native scroll events, better performance or older browser support. Otherwise Lite Scroll offers far more functionality and a better touch experience.

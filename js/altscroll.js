@@ -1,13 +1,13 @@
 /** 
  * Alternate Scroll
  * 
- * @version    0.2.1
+ * @version    0.2.2
  * @author     Aiden Foxx
  * @license    MIT License 
  * @copyright  2015 Aiden Foxx
  * @link       http://github.com/aidenfoxx
  * @twitter    @furiousfoxx
- */ 
+ */
 
 'use strict';
 
@@ -27,11 +27,12 @@ function AltScroll(container, options)
     this.scrollTimeout = null;
     this.scrollEvent = null;
 
-    this.dragStartEvent = null;
     this.dragEvent = null;
     this.dragBegin = null;
     this.dragInitVec = { x: 0, y: 0 };
     this.dragInitMouseVec = { x: 0, y: 0 };
+
+    this.touch = false;
 
     this.resizeTimeout = null;
     this.snapTimeout = null;
@@ -64,7 +65,7 @@ AltScroll.prototype.calcRelativePos = function(x, y)
 
 AltScroll.prototype.calcTouchCoords = function(e)
 {
-    return this.calcRelativePos(!e.changedTouches ? e.pageX : e.changedTouches[0].pageX, !e.changedTouches ? e.pageY : e.changedTouches[0].pageY);
+    return this.calcRelativePos(e.pageX, e.pageY);
 }
 
 AltScroll.prototype.clacPointDistance = function(point1, point2)
@@ -144,8 +145,6 @@ AltScroll.prototype.hideScrollbars = function()
 
 AltScroll.prototype.bindEvents = function()
 {
-    this.dragStartEvent = this.dragStart.bind(this);
-
     // Fix for IE not supporting touch events
     if (!('ontouchstart' in window))
     {
@@ -167,7 +166,7 @@ AltScroll.prototype.bindEvents = function()
         window.addEventListener('touchcancel', this.touchEnd.bind(this));  
     }
 
-    this.container.addEventListener('mousedown', this.dragStartEvent);
+    this.container.addEventListener('mousedown', this.dragStart.bind(this));
     window.addEventListener('mouseup', this.dragEnd.bind(this));
     window.addEventListener('resize', this.resize.bind(this));  
 
@@ -286,30 +285,18 @@ AltScroll.prototype.snapDelay = function()
     }
 }
 
-AltScroll.prototype.touchStart = function(e)
+AltScroll.prototype.touchStart = function()
 {
-    // Unbind mouse events on touch
-    if (this.dragStartEvent && (!e.pointerType || e.pointerType === 'touch'))
-    {
-        this.container.removeEventListener('mousedown', this.dragStartEvent);
-        this.dragStartEvent = null;
-        this.scrollStop();
-    }
+    this.scrollStop();
+    this.touch = true;
 }
 
-AltScroll.prototype.touchEnd = function(e)
+AltScroll.prototype.touchEnd = function()
 {
-    // Rebind once touch has stopped
-    if (!this.dragStartEvent && (!e.pointerType || e.pointerType === 'touch'))
+    if (this.touch && this.options.snap)
     {
-        // Not ideal fix to the mouse event being triggered after touchend
-        setTimeout(function() {
-            this.dragStartEvent = this.dragStart.bind(this);
-            this.container.addEventListener('mousedown', this.dragStartEvent);
-        }.bind(this), 1000);
-
-        if (this.options.snap)
-            this.snapDelay();
+        this.snapDelay();
+        this.touch = false;
     }
 }
 
@@ -341,16 +328,17 @@ AltScroll.prototype.dragEnd = function(e)
 {
     if (this.dragEvent)
     {
-        window.cancelAnimationFrame(this.scrollFrame);
+        var mousePos = this.calcTouchCoords(e);
+        var moveX = this.dragInitMouseVec.x - mousePos.x;
+        var moveY = this.dragInitMouseVec.y - mousePos.y;
 
-        if (this.options.momentum)
+        // If we've not moved and don't need momentum
+        if (this.options.momentum && (moveX || moveY))
         {
-            var mousePos = this.calcTouchCoords(e);
             var dragTime = Date.now() - this.dragBegin;
 
-            // Based on movement since we started dragging
-            var velX = (this.dragInitMouseVec.x - mousePos.x) / dragTime;
-            var velY = (this.dragInitMouseVec.y - mousePos.y) / dragTime;
+            var velX = moveX / dragTime;
+            var velY = moveY / dragTime;
 
             // Use the highest velocity
             var animationLength = Math.abs(Math.abs(velX) > Math.abs(velY) ? velX : velY) / this.options.momentumFalloff;
