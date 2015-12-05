@@ -39,7 +39,8 @@ var options = {
     snap: false,
     snapSpeed: 300,
     momentum: true,
-    momentumFalloff: .006
+    momentumFalloff: .006,
+    dynamicResize: true
 };
 ```
 
@@ -54,6 +55,9 @@ Defines if scrolling will have momentum.
 
 ### 'momentumFalloff'
 Defines the speed at which the momentum slows based on pixels per millisecond.
+
+### 'dynamicResize'
+Defines if the script will resize the scroller upon the window changing.
 
 ## Methods
 The script has multiple avalible methods.

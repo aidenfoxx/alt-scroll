@@ -47,7 +47,8 @@ function AltScroll(container, options)
         scrollLock: false,
         scrollLockThreshold: 20,
         momentum: true,
-        momentumFalloff: .006
+        momentumFalloff: .006,
+        dynamicResize: true
     };
 
     for (var key in options)
@@ -151,24 +152,23 @@ AltScroll.prototype.bindEvents = function()
         if (navigator.maxTouchPoints > 0)
         {
             this.container.addEventListener('pointerdown', this.touchStart.bind(this));
-            window.addEventListener('pointerout', this.touchEnd.bind(this));
+            document.addEventListener('pointerout', this.touchEnd.bind(this));
         }
         else if (navigator.msMaxTouchPoints > 0)
         {
             this.container.addEventListener('MSPointerDown', this.touchStart.bind(this));
-            window.addEventListener('MSPointerOut', this.touchEnd.bind(this));
+            document.addEventListener('MSPointerOut', this.touchEnd.bind(this));
         }
     }
     else
     {
         this.container.addEventListener('touchstart', this.touchStart.bind(this));
-        window.addEventListener('touchend', this.touchEnd.bind(this));
-        window.addEventListener('touchcancel', this.touchEnd.bind(this));  
+        document.addEventListener('touchend', this.touchEnd.bind(this));
+        document.addEventListener('touchcancel', this.touchEnd.bind(this));  
     }
 
     this.container.addEventListener('mousedown', this.dragStart.bind(this));
-    window.addEventListener('mouseup', this.dragEnd.bind(this));
-    window.addEventListener('resize', this.resize.bind(this));  
+    document.addEventListener('mouseup', this.dragEnd.bind(this));
 
     if (this.options.snap)
     {
@@ -179,6 +179,11 @@ AltScroll.prototype.bindEvents = function()
     {
         this.container.addEventListener('mousewheel', this.scrollStop.bind(this));
         this.container.addEventListener('DOMMouseScroll', this.scrollStop.bind(this));
+    }
+
+    if (this.options.dynamicResize)
+    {
+        window.addEventListener('resize', this.resize.bind(this));
     }
 }
 
