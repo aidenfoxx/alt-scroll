@@ -3,7 +3,7 @@ Alternet Scroll is a modified version of Lite Scroll designed to act as touch sh
 
 I only reccomend using this plugin over Lite Scroll if you need native scroll events, better performance or older browser support. Otherwise Lite Scroll offers far more functionality and a better touch experience.
 
-Script example (http://foxx.io/altscroll/).
+Script example (http://projects.foxx.io/altscroll/).
 
 ## Requirements
 To enable easing you must first have the following easing plugin by gre, enabled (https://gist.github.com/gre/1650294).
