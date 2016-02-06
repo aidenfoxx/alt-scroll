@@ -30,6 +30,15 @@ The structure of the HTML follows the syntax:
 </div>
 ```
 
+```css
+/* Only required if you wish to hide the scroll bars  */
+.hide-scroll {
+    width: inherit;
+    height: inherit;
+    overflow: hidden;
+}
+```
+
 ## Options
 
 All avalible options are:
