@@ -280,15 +280,8 @@ AltScroll.prototype.snapDelay = function()
 
     this.snapTimeout = setTimeout(function() { 
         this.container.removeEventListener('scroll', this.scrollEvent); 
-        this.scrollEvent = null; 
         this.snapToNearest();
     }.bind(this), 500);
-    
-    if (!this.scrollEvent)
-    {
-        this.scrollEvent = function() { this.snapDelay(); }.bind(this);
-        this.container.addEventListener('scroll', this.scrollEvent)
-    }
 }
 
 AltScroll.prototype.touchStart = function()
