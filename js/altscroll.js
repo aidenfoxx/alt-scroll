@@ -256,8 +256,6 @@ AltScroll.prototype.scrollToFrame = function(startTime, fromX, toX, fromY, toY, 
 
 AltScroll.prototype.scrollStop = function()
 {
-    if (this.options.snap && this.snapTimeout)
-        clearTimeout(this.snapTimeout);
     window.cancelAnimationFrame(this.scrollFrame);
 }
 
@@ -276,12 +274,23 @@ AltScroll.prototype.snapToNearest = function(speed, easing, callback)
 
 AltScroll.prototype.snapDelay = function()
 {
-    this.scrollStop();
+    if (!this.dragEvent)
+    {
+        this.scrollStop();
+        clearTimeout(this.snapTimeout);
 
-    this.snapTimeout = setTimeout(function() { 
-        this.container.removeEventListener('scroll', this.scrollEvent); 
-        this.snapToNearest();
-    }.bind(this), 500);
+        this.snapTimeout = setTimeout(function() { 
+            this.container.removeEventListener('scroll', this.scrollEvent); 
+            this.scrollEvent = null; 
+            this.snapToNearest();
+        }.bind(this), 500);
+        
+        if (!this.scrollEvent)
+        {
+            this.scrollEvent = function() { this.snapDelay(); }.bind(this);
+            this.container.addEventListener('scroll', this.scrollEvent)
+        }
+    }
 }
 
 AltScroll.prototype.touchStart = function()
@@ -306,6 +315,14 @@ AltScroll.prototype.dragStart = function(e)
 
     if (!this.dragEvent)
     {
+        // Remove any scroll delay caused by mouse wheel events.
+        if (this.scrollEvent)
+        {
+            clearTimeout(this.snapTimeout);
+            this.container.removeEventListener('scroll', this.scrollEvent); 
+            this.scrollEvent = null;
+        }
+
         this.dragBegin = Date.now();
         this.dragInitMouseVec = this.calcTouchCoords(e);
         this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
