@@ -1,7 +1,7 @@
 /** 
  * Alternate Scroll
  * 
- * @version    0.2.2
+ * @version    0.2.3
  * @author     Aiden Foxx
  * @license    MIT License 
  * @copyright  2015 Aiden Foxx
@@ -152,12 +152,12 @@ AltScroll.prototype.bindEvents = function()
         if (navigator.maxTouchPoints > 0)
         {
             this.container.addEventListener('pointerdown', this.touchStart.bind(this));
-            document.addEventListener('pointerout', this.touchEnd.bind(this));
+            document.addEventListener('pointerup', this.touchEnd.bind(this));
         }
         else if (navigator.msMaxTouchPoints > 0)
         {
             this.container.addEventListener('MSPointerDown', this.touchStart.bind(this));
-            document.addEventListener('MSPointerOut', this.touchEnd.bind(this));
+            document.addEventListener('MSPointerUp', this.touchEnd.bind(this));
         }
     }
     else
