@@ -297,8 +297,11 @@ AltScroll.prototype.snapDelay = function()
 
 AltScroll.prototype.touchStart = function(e)
 {
-    this.scrollStop();
-    this.touch = true;
+    if (e.pointerType !== 'mouse')
+    {
+        this.scrollStop();
+        this.touch = true;
+    }
 }
 
 AltScroll.prototype.touchEnd = function(e)
