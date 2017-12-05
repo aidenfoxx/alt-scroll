@@ -1,7 +1,7 @@
 /** 
  * Alternate Scroll
  * 
- * @version    0.2.3
+ * @version    0.2.4
  * @author     Aiden Foxx
  * @license    MIT License 
  * @copyright  2015 Aiden Foxx
@@ -153,11 +153,13 @@ AltScroll.prototype.bindEvents = function()
         {
             this.container.addEventListener('pointerdown', this.touchStart.bind(this));
             document.addEventListener('pointerup', this.touchEnd.bind(this));
+            document.addEventListener('pointercancel', this.touchEnd.bind(this));
         }
         else if (navigator.msMaxTouchPoints > 0)
         {
             this.container.addEventListener('MSPointerDown', this.touchStart.bind(this));
             document.addEventListener('MSPointerUp', this.touchEnd.bind(this));
+            document.addEventListener('MSPointerCalcel', this.touchEnd.bind(this));
         }
     }
     else
@@ -293,41 +295,44 @@ AltScroll.prototype.snapDelay = function()
     }
 }
 
-AltScroll.prototype.touchStart = function()
+AltScroll.prototype.touchStart = function(e)
 {
     this.scrollStop();
     this.touch = true;
 }
 
-AltScroll.prototype.touchEnd = function()
+AltScroll.prototype.touchEnd = function(e)
 {
     if (this.touch && this.options.snap)
     {
         this.snapDelay();
-        this.touch = false;
     }
+    this.touch = false;
 }
 
 AltScroll.prototype.dragStart = function(e)
 {
-    e.preventDefault();
-    this.scrollStop();
-
-    if (!this.dragEvent)
+    if (!this.touch)
     {
-        // Remove any scroll delay caused by mouse wheel events.
-        if (this.scrollEvent)
-        {
-            clearTimeout(this.snapTimeout);
-            this.container.removeEventListener('scroll', this.scrollEvent); 
-            this.scrollEvent = null;
-        }
+        e.preventDefault();
+        this.scrollStop();
 
-        this.dragBegin = Date.now();
-        this.dragInitMouseVec = this.calcTouchCoords(e);
-        this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
-        this.dragEvent = this.drag.bind(this);
-        this.container.addEventListener('mousemove', this.dragEvent);
+        if (!this.dragEvent)
+        {
+            // Remove any scroll delay caused by mouse wheel events.
+            if (this.scrollEvent)
+            {
+                clearTimeout(this.snapTimeout);
+                this.container.removeEventListener('scroll', this.scrollEvent); 
+                this.scrollEvent = null;
+            }
+
+            this.dragBegin = Date.now();
+            this.dragInitMouseVec = this.calcTouchCoords(e);
+            this.dragInitVec = { x: this.container.scrollLeft, y: this.container.scrollTop };
+            this.dragEvent = this.drag.bind(this);
+            this.container.addEventListener('mousemove', this.dragEvent);
+        }     
     }
 }
 
